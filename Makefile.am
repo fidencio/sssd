@@ -677,6 +677,8 @@ dist_noinst_HEADERS = \
     src/util/inotify.h \
     src/util/sss_iobuf.h \
     src/util/tev_curl.h \
+    src/util/secrets/secrets.h \
+    src/util/secrets/sec_pvt.h \
     src/monitor/monitor.h \
     src/monitor/monitor_interfaces.h \
     src/monitor/monitor_iface_generated.h \
@@ -989,6 +991,27 @@ libsss_cert_la_LIBADD = \
     libsss_certmap.la \
     $(NULL)
 libsss_cert_la_LDFLAGS = \
+    -avoid-version \
+    $(NULL)
+
+
+pkglib_LTLIBRARIES += libsss_secrets.la
+
+libsss_secrets_la_SOURCES = \
+    src/util/secrets/secrets.c \
+    src/util/secrets/config.c \
+    $(NULL)
+libsss_secrets_la_CFLAGS = \
+    $(AM_CFLAGS) \
+    $(NULL)
+libsss_secrets_la_LIBADD = \
+    $(TALLOC_LIBS) \
+    $(LDB_LIBS) \
+    libsss_crypt.la \
+    libsss_debug.la \
+    libsss_util.la \
+    $(NULL)
+libsss_secrets_la_LDFLAGS = \
     -avoid-version \
     $(NULL)
 
