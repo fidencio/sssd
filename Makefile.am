@@ -1554,6 +1554,7 @@ sssd_secrets_LDADD = \
     $(SYSTEMD_DAEMON_LIBS) \
     $(SSSD_INTERNAL_LTLIBS) \
     $(CURL_LIBS) \
+    libsss_secrets.la \
     $(NULL)
 endif
 
