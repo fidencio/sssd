@@ -23,6 +23,7 @@ import pytest
 import socket
 import time
 import signal
+import sys
 from requests import HTTPError
 
 import kdc
