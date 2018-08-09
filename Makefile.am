@@ -995,6 +995,7 @@ libsss_cert_la_LDFLAGS = \
     $(NULL)
 
 
+if BUILD_WITH_LIBSECRET
 pkglib_LTLIBRARIES += libsss_secrets.la
 
 libsss_secrets_la_SOURCES = \
@@ -1014,6 +1015,7 @@ libsss_secrets_la_LIBADD = \
 libsss_secrets_la_LDFLAGS = \
     -avoid-version \
     $(NULL)
+endif
 
 pkglib_LTLIBRARIES += libsss_util.la
 libsss_util_la_SOURCES = \
@@ -1566,13 +1568,11 @@ sssd_kcm_SOURCES = \
     src/responder/kcm/kcmsrv_ccache_mem.c \
     src/responder/kcm/kcmsrv_ccache_json.c \
     src/responder/kcm/kcmsrv_ccache_secdb.c \
-    src/responder/kcm/kcmsrv_ccache_secrets.c \
     src/responder/kcm/kcmsrv_ops.c \
     src/responder/kcm/kcmsrv_op_queue.c \
     src/util/sss_sockets.c \
     src/util/sss_krb5.c \
     src/util/sss_iobuf.c \
-    src/util/tev_curl.c \
     $(SSSD_RESPONDER_OBJ) \
     $(NULL)
 sssd_kcm_CFLAGS = \
@@ -1584,7 +1584,6 @@ sssd_kcm_CFLAGS = \
     $(NULL)
 sssd_kcm_LDADD = \
     $(KRB5_LIBS) \
-    $(CURL_LIBS) \
     $(JANSSON_LIBS) \
     $(SSSD_LIBS) \
     $(UUID_LIBS) \
@@ -1592,6 +1591,17 @@ sssd_kcm_LDADD = \
     $(SSSD_INTERNAL_LTLIBS) \
     libsss_secrets.la \
     $(NULL)
+
+if BUILD_SECRETS
+sssd_kcm_SOURCES += \
+    src/responder/kcm/kcmsrv_ccache_secrets.c \
+    src/util/tev_curl.c \
+    $(NULL)
+sssd_kcm_LDADD += \
+    $(CURL_LIBS) \
+    $(NULL)
+endif
+
 endif
 
 sssd_be_SOURCES = \
@@ -3726,6 +3736,7 @@ intgcheck-prepare:
 	    --with-ldb-lib-dir="$$prefix"/lib/ldb \
 	    --enable-intgcheck-reqs \
 	    --without-semanage \
+	    --with-secrets \
 	    --with-session-recording-shell=/bin/false \
 	    $(INTGCHECK_CONFIGURE_FLAGS) \
 	    CFLAGS="-O2 -g $$CFLAGS"; \
@@ -4938,7 +4949,7 @@ endif
 	$(INSTALL) -d -m 0711 $(DESTDIR)$(sssdconfdir) \
                           $(DESTDIR)$(sssdconfdir)/conf.d \
                           $(DESTDIR)$(sssdconfdir)/pki
-if BUILD_SECRETS
+if BUILD_WITH_LIBSECRET
 	$(MKDIR_P) $(DESTDIR)$(secdbpath)
 endif
 

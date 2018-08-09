@@ -118,11 +118,8 @@
     %global enable_systemtap_opt --enable-systemtap
 %endif
 
-%if (0%{?fedora} || 0%{?rhel} >= 7)
-    %global with_secrets 1
-%else
-    %global with_secret_responder --without-secrets
-%endif
+%global with_secrets 0
+%global with_secret_responder --without-secrets
 
 %if (0%{?fedora} >= 23 || 0%{?rhel} >= 7)
     %global with_kcm 1
@@ -278,13 +275,13 @@ BuildRequires: systemtap-sdt-devel
 %endif
 %if (0%{?with_secrets} == 1)
 BuildRequires: http-parser-devel
+BuildRequires: libcurl-devel
 %endif
 %if (0%{?with_kcm} == 1)
 BuildRequires: libuuid-devel
 %endif
 %if (0%{?with_secrets} == 1 || 0%{?with_kcm} == 1)
 BuildRequires: jansson-devel
-BuildRequires: libcurl-devel
 %endif
 %if (0%{?with_gdm_pam_extensions} == 1)
 BuildRequires: gdm-pam-extensions-devel
