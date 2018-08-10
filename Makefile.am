@@ -4670,8 +4670,6 @@ if HAVE_SYSTEMD_UNIT
         src/sysv/systemd/sssd-pam.socket \
         src/sysv/systemd/sssd-pam-priv.socket \
         src/sysv/systemd/sssd-pam.service \
-        src/sysv/systemd/sssd-secrets.socket \
-        src/sysv/systemd/sssd-secrets.service \
         $(NULL)
 if BUILD_AUTOFS
     systemdunit_DATA += \
@@ -4688,6 +4686,12 @@ if BUILD_PAC_RESPONDER
     systemdunit_DATA += \
         src/sysv/systemd/sssd-pac.socket \
         src/sysv/systemd/sssd-pac.service \
+        $(NULL)
+endif
+if BUILD_SECRETS
+    systemdunit_DATA += \
+        src/sysv/systemd/sssd-secrets.socket \
+        src/sysv/systemd/sssd-secrets.service \
         $(NULL)
 endif
 if BUILD_SSH
@@ -4827,6 +4831,7 @@ src/sysv/systemd/sssd-pam.service: src/sysv/systemd/sssd-pam.service.in Makefile
 	@$(MKDIR_P) src/sysv/systemd/
 	$(replace_script)
 
+if BUILD_SECRETS
 src/sysv/systemd/sssd-secrets.socket: src/sysv/systemd/sssd-secrets.socket.in Makefile
 	@$(MKDIR_P) src/sysv/systemd/
 	$(replace_script)
@@ -4834,6 +4839,7 @@ src/sysv/systemd/sssd-secrets.socket: src/sysv/systemd/sssd-secrets.socket.in Ma
 src/sysv/systemd/sssd-secrets.service: src/sysv/systemd/sssd-secrets.service.in Makefile
 	@$(MKDIR_P) src/sysv/systemd/
 	$(replace_script)
+endif
 
 if BUILD_AUTOFS
 src/sysv/systemd/sssd-autofs.socket: src/sysv/systemd/sssd-autofs.socket.in Makefile
@@ -4882,9 +4888,25 @@ src/sysv/systemd/sssd-sudo.service: src/sysv/systemd/sssd-sudo.service.in Makefi
 endif
 
 if BUILD_KCM
+if BUILD_SECRETS
+kcm_socket_requires = Requires=sssd-secrets.socket
+else
+kcm_socket_requires =
+endif
+
+kcm_edit_cmd = $(edit_cmd) \
+        -e 's|@kcm_socket_requires[@]|$(kcm_socket_requires)|g'
+
+kcm_replace_script = \
+    @rm -f $@ $@.tmp; \
+    srcdir=''; \
+        test -f ./$@.in || srcdir=$(srcdir)/; \
+        $(kcm_edit_cmd) $${srcdir}$@.in >$@.tmp; \
+    mv $@.tmp $@
+
 src/sysv/systemd/sssd-kcm.socket: src/sysv/systemd/sssd-kcm.socket.in Makefile
 	@$(MKDIR_P) src/sysv/systemd/
-	$(replace_script)
+	$(kcm_replace_script)
 
 src/sysv/systemd/sssd-kcm.service: src/sysv/systemd/sssd-kcm.service.in Makefile
 	@$(MKDIR_P) src/sysv/systemd/
